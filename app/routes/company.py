@@ -13,7 +13,7 @@ async def get_company(company_ticker: Annotated[str, Path()]):
     existing_company = await Company.get_company(ticker=company_ticker)
     if not existing_company:
         raise CompanyNotFoundException()
-    company = Company.from_company(data=existing_company)
+    company = Company.to_dto(data=existing_company)
     return company
 
 @company_router.get("/", status_code=status.HTTP_200_OK, response_model=ResponseDTO[list[BaseCompany]])

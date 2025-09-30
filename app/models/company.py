@@ -39,7 +39,7 @@ class Company(CommonDocument):
         )
 
     @classmethod
-    def from_company(cls, data: "Company") -> BaseCompany:
+    def to_dto(cls, data: "Company") -> BaseCompany:
         """
         Convert a Company document instance into a BaseCompany DTO.
 
