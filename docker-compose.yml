@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  configsvr:
+    image: mongo:6.0
+    container_name: configsvr
+    command: >
+      mongod --configsvr --replSet configReplSet
+             --port 27018 --bind_ip_all
+    ports:
+      - "27018:27018"
+    volumes:
+      - ./data/configsvr:/data/db
+
+  shard1:
+    image: mongo:6.0
+    container_name: shard1
+    command: >
+      mongod --shardsvr --replSet shard1ReplSet
+             --port 27019 --bind_ip_all
+    ports:
+      - "27019:27019"
+    volumes:
+      - ./data/shard1:/data/db
+
+  shard2:
+    image: mongo:6.0
+    container_name: shard2
+    command: >
+      mongod --shardsvr --replSet shard2ReplSet
+             --port 27020 --bind_ip_all
+    ports:
+      - "27020:27020"
+    volumes:
+      - ./data/shard2:/data/db
+
+  mongos:
+    image: mongo:6.0
+    container_name: mongos
+    depends_on:
+      - configsvr
+      - shard1
+      - shard2
+    command: ["/bin/bash", "/init.sh"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./init.sh:/init.sh:ro
+      - ./init.js:/init.js:ro
