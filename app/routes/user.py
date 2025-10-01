@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Body, status
 from typing import Annotated
 from app.dtos.user import UserUpdate
-from app.dtos.common import ResponseDTO
+from app.common.schema import ResponseDTO
 from app.conf.security import auth_dependency
 from app.models.user import User
 from app.exceptions.user import UserNotFoundException
 from datetime import datetime
 
-user_router = APIRouter(prefix="/user", tags=["User"])
+user_router = APIRouter(prefix="/api/users", tags=["User"])
 
 @user_router.patch("/", status_code=status.HTTP_200_OK, response_model=ResponseDTO)
 async def update_user(body: Annotated[UserUpdate, Body()], crr_auth: auth_dependency):
@@ -22,8 +22,8 @@ async def update_user(body: Annotated[UserUpdate, Body()], crr_auth: auth_depend
             User.birthday: body.birthday if body.birthday else user.birthday
         }
     })
-    
-    return ResponseDTO(message="User updated Successfully")
+    response = ResponseDTO(message="User updated Successfully", status_code=status.HTTP_200_OK)
+    return response
 
 @user_router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(crr_auth: auth_dependency):

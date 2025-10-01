@@ -1,7 +1,8 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
 from datetime import datetime
+from app.common.schema import CommonBaseModel
 
-class UserUpdate(BaseModel):
+class UserUpdate(CommonBaseModel):
     first_name: str | None = Field(
         default=None,
         title="First Name",

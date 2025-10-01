@@ -2,7 +2,7 @@ from beanie import Link, Indexed, before_event, Delete
 from typing import Annotated
 from pydantic import Field, EmailStr
 from .user import User
-from .common import CommonDocument
+from app.common.model import CommonDocument
 from app.dtos.auth import BaseAuth
 
 class Auth(CommonDocument):

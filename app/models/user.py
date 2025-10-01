@@ -1,7 +1,7 @@
 from pydantic import Field, field_validator
 from beanie import before_event, Update
 from datetime import datetime
-from .common import CommonDocument
+from app.common.model import CommonDocument
 
 class User(CommonDocument):
     """
