@@ -134,4 +134,4 @@ class Company(CommonDocument):
             "result": companies,
             "next_cursor": str(companies[-1].ticker) if companies else None,
             "total": total_companies
-        }
+        } 

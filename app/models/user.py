@@ -42,12 +42,5 @@ class User(CommonDocument):
             self.first_name = self.first_name.capitalize()
         elif self.last_name:
             self.last_name = self.last_name.capitalize()
-        
-    @field_validator("birthday")
-    def validate_birthday(cls, v: datetime) -> datetime:
-        """
-            Validate the user's birthday field.
-        """
-        if v and v > datetime.now():
-            raise ValueError("Birthday cannot be in the future.")
-        return v
+ 
+    
