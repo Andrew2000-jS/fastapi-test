@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, Any
 from datetime import datetime
 
 T = TypeVar('T')
@@ -16,13 +16,13 @@ class CommonBaseModel(BaseModel, Generic[T]):
             extra="forbid"
         )
 
-class PaginationDTO(CommonBaseModel, BaseModel):
+class PaginationResponseDTO(CommonBaseModel, BaseModel):
     """
     DTO to hold pagination metadata for hybrid (time + cursor) pagination.
     """
     limit: int = Field(..., gt=0, description="Number of items requested per page")
     total: int = Field(..., ge=0, description="Total number of items within the date range")
-    next_cursor: str | None = Field(
+    next_cursor: Any | None = Field(
         default=None, description="Cursor (ObjectId) for the next page, or None if no more pages"
     )
     start_date: datetime | None = Field(
@@ -32,7 +32,6 @@ class PaginationDTO(CommonBaseModel, BaseModel):
         default=None, description="End of the time window used for filtering"
     )
     
-    
 class ResponseDTO(CommonBaseModel, Generic[T]):   
     """
     Standard API response wrapper with optional pagination metadata.
@@ -40,6 +39,9 @@ class ResponseDTO(CommonBaseModel, Generic[T]):
     message: str | None = Field(default=None, description="Human-readable response message")
     data: T | None = Field(default=None, description="The actual payload")
     status_code: int = Field(..., description="HTTP status code of the response")
-    pagination: PaginationDTO | None = Field(
+    pagination: PaginationResponseDTO | None = Field(
         default=None, description="Pagination metadata if the response is paginated"
     )
+
+
+    

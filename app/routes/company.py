@@ -3,7 +3,8 @@ from typing import Annotated
 from pydantic import ValidationError
 from datetime import datetime
 from app.models.company import Company
-from app.common.schema import ResponseDTO, PaginationDTO
+from app.common.schema import ResponseDTO, PaginationResponseDTO
+from app.common.criteria import Criteria, SortDTO, FiltersDTO, PaginationDTO, OrderBy
 from app.dtos.company import CompanyCreate, CompanyUpdate, BaseCompany
 from app.exceptions.company import CompanyAlreadyExistsException, CompanyNotFoundException
 from app.conf.security import auth_dependency
@@ -30,8 +31,18 @@ async def get_companies(
     end_date: Annotated[datetime | None, Query()] = None,
 ):
     try:
-        companies = await Company.paginate(limit=limit, cursor=cursor, start_date=start_date, end_date=end_date)
-        pagination = PaginationDTO(
+        criteria = Criteria(
+            pagination=PaginationDTO(
+                cursor=cursor, 
+                cursor_name="ticker",
+                start_date=start_date, 
+                end_date=end_date, 
+                limit=limit
+            ),
+            sort_by=SortDTO(field="ticker", order=OrderBy.ASC)
+        )
+        companies = await Company.paginate(criteria=criteria, cursor_name="ticker")
+        pagination = PaginationResponseDTO(
             limit=limit,
             total=companies["total"],
             next_cursor=companies["next_cursor"],
