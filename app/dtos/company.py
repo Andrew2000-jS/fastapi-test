@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
+from app.common.schema import CommonBaseModel
 
-class BaseCompany(BaseModel):
+class BaseCompany(CommonBaseModel):
     ticker: str = Field(
         ...,
         title="Ticker Symbol",
@@ -27,7 +28,7 @@ class BaseCompany(BaseModel):
 class CompanyCreate(BaseCompany):
     pass
     
-class CompanyUpdate(BaseModel):
+class CompanyUpdate(CommonBaseModel):
     ticker: str | None | None = Field(
         default=None,
         title="Ticker Symbol",
@@ -51,7 +52,7 @@ class CompanyUpdate(BaseModel):
         examples=["Miami street 123"]
     )
     
-class CompanyList(BaseModel):
+class CompanyList(CommonBaseModel):
     companies: list[BaseCompany] = Field(
         ...,
         title="Companies",

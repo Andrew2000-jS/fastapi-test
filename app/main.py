@@ -15,7 +15,7 @@ async def lifespan(app: FastAPI):
     finally:
         await MongoDB.disconnect_db()
     
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, version="v1")
 
 register_exception_handlers(app)
 

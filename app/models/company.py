@@ -1,7 +1,9 @@
 from beanie import Indexed
+from beanie.operators import Or
 from pydantic import Field
-from typing import Annotated
-from .common import CommonDocument
+from typing import Annotated, Any
+from datetime import datetime
+from app.common.model import CommonDocument
 from app.dtos.company import BaseCompany
 from app.dtos.company import BaseCompany
 from app.exceptions.company import CompanyNotFoundException
@@ -79,9 +81,57 @@ class Company(CommonDocument):
                 CompanyNotFoundException: If no company with the given ID or ticker exists.
         """
         existing_company = await cls.find_one(
-            (cls.id == company_id) | (cls.ticker == ticker)
+            Or(cls.id == company_id, cls.ticker == ticker)
         )
-        if not existing_company:
-            raise CompanyNotFoundException()
         return existing_company
     
+    @classmethod
+    async def paginate(
+        cls,
+        limit: int = 5,
+        cursor: str | None = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None
+    ) -> dict[str, Any]:
+        """
+        Hybrid pagination with date range and cursor (ticker-based).
+
+        Args:
+            limit (int): Number of results per page.
+            cursor (str, optional): Last ticker from previous page.
+            start_date (datetime, optional): Filter companies created from this date.
+            end_date (datetime, optional): Filter companies created up to this date.
+
+        Returns:
+            dict: {
+                "result": List[Company],
+                "next_cursor": str | None,
+                "total": int
+            }
+        """
+        match_filter = {}
+        
+        if start_date or end_date:
+            match_filter["created_at"] = {}
+            if start_date:
+                match_filter["created_at"]["$gte"] = start_date
+            if end_date:
+                match_filter["created_at"]["$lte"] = end_date
+        
+        if cursor:
+            match_filter["ticker"] = {"$gt": cursor} if "ticker" not in match_filter else {"$gt": cursor, **match_filter["ticker"]}
+
+        pipeline = [{"$match": match_filter}] if match_filter else []
+        pipeline += [
+            {"$sort": {"ticker": 1}},
+            {"$limit": limit}
+        ]
+        total_companies = await cls.count()
+        results = await cls.aggregate(pipeline).to_list()
+        companies = [cls(**doc) for doc in results]
+        
+        return {
+            "result": companies,
+            "next_cursor": str(companies[-1].ticker) if companies else None,
+            "total": total_companies
+        } 

@@ -10,7 +10,7 @@ from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from .consts import SECRET_KEY, ALGORITHM
 from app.exceptions.auth import TokenCredentialsException
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
 
 class PasswordService:
     """Handles password hashing and verification."""

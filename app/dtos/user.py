@@ -1,7 +1,9 @@
-from pydantic import BaseModel, Field
-from datetime import datetime
+from pydantic import Field, field_validator
+from datetime import datetime, timezone
+from app.common.schema import CommonBaseModel
+from app.exceptions.user import UserInvalidBirthdayException
 
-class UserUpdate(BaseModel):
+class UserUpdate(CommonBaseModel):
     first_name: str | None = Field(
         default=None,
         title="First Name",
@@ -17,3 +19,14 @@ class UserUpdate(BaseModel):
         title="Birthday",
         description="The user's date of birth."
     )
+    
+    @field_validator("birthday")
+    @classmethod
+    def validate_birthday(cls, v):
+        if v:
+            now = datetime.now(timezone.utc)
+            if v.tzinfo is None or v.tzinfo.utcoffset(v) is None:
+                v = v.replace(tzinfo=timezone.utc)
+            if v.date() >= now.date():
+                raise UserInvalidBirthdayException()
+        return v

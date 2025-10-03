@@ -1,6 +1,5 @@
 class UserAlreadyExistsException(Exception):
     def __init__(self, username: str):
-        print("Called")
         self.username = username
         self.message = f"User '{username}' already exists."
         super().__init__(self.message)

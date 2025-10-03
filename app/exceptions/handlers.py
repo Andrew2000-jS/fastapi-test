@@ -2,7 +2,7 @@ from fastapi import Request, FastAPI, status
 from fastapi.responses import JSONResponse
 from typing import Type, Dict, Any
 from .auth import UserAlreadyExistsException, InvalidCredentialsException, TokenCredentialsException
-from .user import UserNotFoundException
+from .user import UserNotFoundException, UserInvalidBirthdayException
 from .company import CompanyNotFoundException, CompanyAlreadyExistsException
 
 EXCEPTION_MAP: Dict[Type[Exception], Dict[str, Any]] = {
@@ -11,7 +11,8 @@ EXCEPTION_MAP: Dict[Type[Exception], Dict[str, Any]] = {
     UserNotFoundException: {"status_code": status.HTTP_404_NOT_FOUND},
     TokenCredentialsException: {"status_code": status.HTTP_401_UNAUTHORIZED},
     CompanyNotFoundException: {"status_code": status.HTTP_404_NOT_FOUND},
-    CompanyAlreadyExistsException: {"status_code": status.HTTP_400_BAD_REQUEST}
+    CompanyAlreadyExistsException: {"status_code": status.HTTP_400_BAD_REQUEST},
+    UserInvalidBirthdayException: {"status_code": status.HTTP_400_BAD_REQUEST},
 }
 
 async def generic_exception_handler(request: Request, exc: Exception):

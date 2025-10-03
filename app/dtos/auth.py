@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import Field, EmailStr
+from app.common.schema import CommonBaseModel
 
-class BaseAuth(BaseModel):
+class BaseAuth(CommonBaseModel):
     username: str = Field(
         ..., 
         min_length=3, 
@@ -23,7 +24,7 @@ class BaseAuth(BaseModel):
 class AuthCreate(BaseAuth):
     pass
     
-class AuthUpdate(BaseModel):
+class AuthUpdate(CommonBaseModel):
     username: str | None = Field(
         default=None,
         min_length=3,
@@ -44,7 +45,7 @@ class AuthUpdate(BaseModel):
     )
 
 
-class Token(BaseModel):
+class Token(CommonBaseModel):
     access_token: str = Field(
         ...,
         title="Access Token",
