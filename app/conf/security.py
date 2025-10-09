@@ -7,7 +7,7 @@ from datetime import timedelta, datetime, timezone
 from typing import Annotated, Any
 from fastapi import Depends
 from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
-from .consts import SECRET_KEY, ALGORITHM
+from .settings import settings
 from app.exceptions.auth import TokenCredentialsException
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
@@ -32,12 +32,12 @@ class TokenService:
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
         to_encode.update({"exp": expire})
-        return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
     
     @classmethod
     def decode_access_token(cls, token: str) -> dict:
         try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[str(ALGORITHM)])
+            payload = jwt.decode(token, settings.secret_key, algorithms=[str(settings.algorithm)])
             return payload
         except ExpiredSignatureError:
             raise TokenCredentialsException()

@@ -8,7 +8,7 @@ from app.models.auth import Auth
 from app.models.user import User
 from app.dtos.auth import AuthCreate, Token
 from app.common.schema import ResponseDTO
-from app.conf.consts import ACCESS_TOKEN_EXPIRE_MINUTES
+from app.conf.settings import settings
 from app.exceptions.auth import UserAlreadyExistsException, InvalidCredentialsException
 
 auth_router = APIRouter(prefix="/api/auth", tags=["Auth"])
@@ -42,7 +42,7 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> T
             raise InvalidCredentialsException()
         
         data = {"sub": auth.username}
-        token_exp = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        token_exp = timedelta(minutes=settings.access_token_expire_minutes)
         token = TokenService.create_access_token(data, expires_delta=token_exp)
         return Token(access_token=token, token_type="bearer")
     except ValidationError as e:

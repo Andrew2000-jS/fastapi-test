@@ -3,10 +3,13 @@ from typing import Annotated
 from pydantic import ValidationError
 from datetime import datetime
 from app.models.company import Company
-from app.common.schema import ResponseDTO, PaginationDTO
+from app.common.schema import ResponseDTO, PaginationResponseDTO
+from app.common.criteria import Criteria, SortDTO, PaginationDTO, OrderBy
+from app.database.redis import RedisManager
 from app.dtos.company import CompanyCreate, CompanyUpdate, BaseCompany
 from app.exceptions.company import CompanyAlreadyExistsException, CompanyNotFoundException
 from app.conf.security import auth_dependency
+import json
 
 company_router = APIRouter(prefix="/api/companies", tags=["Company"])
 
@@ -30,20 +33,41 @@ async def get_companies(
     end_date: Annotated[datetime | None, Query()] = None,
 ):
     try:
-        companies = await Company.paginate(limit=limit, cursor=cursor, start_date=start_date, end_date=end_date)
-        pagination = PaginationDTO(
+        cache_key = f"companies:{cursor}:{limit}:{start_date}:{end_date}"
+        redis_client = await RedisManager.get_client()
+
+        cached = await redis_client.get(cache_key)
+        if cached:
+            return ResponseDTO.model_validate_json(cached)
+
+        criteria = Criteria(
+            pagination=PaginationDTO(
+                cursor=cursor,
+                cursor_name="ticker",
+                start_date=start_date,
+                end_date=end_date,
+                limit=limit
+            ),
+            sort_by=SortDTO(field="ticker", order=OrderBy.ASC)
+        )
+        companies = await Company.paginate(criteria=criteria, cursor_name="ticker")
+
+        pagination = PaginationResponseDTO(
             limit=limit,
             total=companies["total"],
             next_cursor=companies["next_cursor"],
         )
-        
         response = ResponseDTO(
             message="Companies page",
             status_code=status.HTTP_200_OK,
             data=companies["result"],
             pagination=pagination
         )
+
+        await redis_client.set(cache_key, response.model_dump_json(), ex=60)
+
         return response
+
     except ValidationError as e:
         raise e
 

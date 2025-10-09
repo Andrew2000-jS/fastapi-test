@@ -1,4 +1,4 @@
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, field_serializer
 from datetime import datetime, timezone
 from app.common.schema import CommonBaseModel
 from app.exceptions.user import UserInvalidBirthdayException
@@ -30,3 +30,5 @@ class UserUpdate(CommonBaseModel):
             if v.date() >= now.date():
                 raise UserInvalidBirthdayException()
         return v
+
+    
