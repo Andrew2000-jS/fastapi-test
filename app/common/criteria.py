@@ -17,7 +17,6 @@ class LogicalOperator(Enum):
     OR = "$or"
     NOR = "$nor"
 
-
 class OrderBy(Enum):
     """
     Enumeration for sort order directions.
@@ -28,7 +27,6 @@ class OrderBy(Enum):
     """
     ASC = 1
     DESC = -1
-
 
 class SortDTO(CommonBaseModel):
     """
